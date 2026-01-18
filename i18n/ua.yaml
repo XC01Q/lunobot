@@ -179,3 +179,24 @@ auto_close_time_updated: "✅ Час автозакриття змінено н�
 auto_close_time_invalid: "❌ Невірний формат часу. Використовуйте ГГ:ХХ"
 auto_close_keys_select: "🗝️ Куди віддавати ключі після автозакриття?"
 auto_close_keys_updated: "✅ Ключі будуть {location}"
+
+# Status Logs
+btn_status_logs: "📋 Логи статусу"
+logs_menu_header: "📋 Меню логів статусу"
+btn_view_logs: "👁️ Переглянути логи"
+btn_download_logs: "📥 Завантажити лог"
+logs_empty: "📭 Немає записів логів за цей місяць"
+logs_header: |
+  📋 Логи статусу за {month}.{year}
+
+  Сторінка {page} з {total_pages}
+
+logs_entry: "📅 {date} {time}\n   Статус: {status} | Хто: {user}\n"
+log_status_open: "Відкрито ✅"
+log_status_closed: "Закрито ❌"
+log_keys_admin: "Ключі → Адмін 👤"
+log_keys_lobby: "Ключі → Вахта 🏢"
+logs_file_caption: "📋 Лог статусу за {month}.{year}"
+logs_file_not_found: "❌ Файл логу за цей місяць не знайдено"
+
+

@@ -52,6 +52,7 @@ func (mg *MenuGenerator) initializeButtons() {
 		{TextKey: "btn_set_rights", Callback: "set_rights"},
 		{TextKey: "btn_create_broadcast", Callback: "create_broadcast"},
 		{TextKey: "btn_auto_close", Callback: "auto_close"},
+		{TextKey: "btn_status_logs", Callback: "status_logs"},
 	}
 }
 

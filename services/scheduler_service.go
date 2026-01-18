@@ -61,7 +61,6 @@ func (s *SchedulerService) checkAndExecute() {
 	now := time.Now()
 	currentTime := now.Format("15:04")
 
-	// Check if current time matches close time (with 1-minute window)
 	if s.timeMatches(currentTime, settings.CloseTime) {
 		log.Printf("Auto-close triggered at %s", currentTime)
 		s.executeAutoClose(settings)
@@ -69,7 +68,6 @@ func (s *SchedulerService) checkAndExecute() {
 }
 
 func (s *SchedulerService) timeMatches(current, target string) bool {
-	// Parse times
 	currentParts := strings.Split(current, ":")
 	targetParts := strings.Split(target, ":")
 
@@ -81,25 +79,21 @@ func (s *SchedulerService) timeMatches(current, target string) bool {
 }
 
 func (s *SchedulerService) executeAutoClose(settings *models.AutoCloseSettings) {
-	// Get current status to check if already closed
 	status, err := s.statusService.GetStatus()
 	if err != nil {
 		log.Printf("Error getting status for auto-close: %v", err)
 		return
 	}
 
-	// Skip if already closed
 	if !status.IsOpen {
 		return
 	}
 
-	// Use the last user who changed status
 	updatedBy := settings.LastStatusBy
 	if updatedBy == "" {
 		updatedBy = "auto-close"
 	}
 
-	// Close the status
 	err = s.db.UpdateOpenStatusAuto(false, settings.KeysToLobby, updatedBy)
 	if err != nil {
 		log.Printf("Error executing auto-close: %v", err)

@@ -34,3 +34,4 @@ go.work.sum
 bot.db
 lunobot
 start.sh
+log/

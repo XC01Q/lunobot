@@ -29,6 +29,7 @@ type BotHandlers struct {
 	statusService    *services.StatusService
 	broadcastService *services.BroadcastService
 	schedulerService *services.SchedulerService
+	logService       *services.LogService
 	menu             *menu.MenuGenerator
 	translator       *i18n.Translator
 	userStates       map[int64]*UserState
@@ -42,6 +43,7 @@ func NewBotHandlers(
 	statusService *services.StatusService,
 	broadcastService *services.BroadcastService,
 	schedulerService *services.SchedulerService,
+	logService *services.LogService,
 ) *BotHandlers {
 	translator := i18n.NewTranslator()
 	h := &BotHandlers{
@@ -51,6 +53,7 @@ func NewBotHandlers(
 		statusService:    statusService,
 		broadcastService: broadcastService,
 		schedulerService: schedulerService,
+		logService:       logService,
 		menu:             menu.NewMenuGenerator(translator),
 		translator:       translator,
 		userStates:       make(map[int64]*UserState),
@@ -194,6 +197,14 @@ func (h *BotHandlers) routeCallback(callback *tgbotapi.CallbackQuery, user *mode
 		h.handleRightsSelection(data, callback.From.ID, chatID, messageID, user)
 	case strings.HasPrefix(data, "idea_") && user.HasRights(models.RightsAdmin):
 		h.handleIdeaAction(data, callback, user)
+	case data == "status_logs" && user.HasRights(models.RightsAdmin):
+		h.handleStatusLogsMenu(chatID, messageID, user)
+	case data == "view_logs" && user.HasRights(models.RightsAdmin):
+		h.handleViewLogs(chatID, messageID, user, 1)
+	case data == "download_logs" && user.HasRights(models.RightsAdmin):
+		h.handleDownloadLogs(chatID, messageID, user)
+	case strings.HasPrefix(data, "logs_page_") && user.HasRights(models.RightsAdmin):
+		h.handleLogsPageNavigation(data, chatID, messageID, user)
 	default:
 		h.sendMessage(chatID, h.t("error_unknown_command", user))
 	}
@@ -492,7 +503,10 @@ func (h *BotHandlers) handleOpenStatusUpdate(data string, chatID int64, messageI
 		return
 	}
 
-	// Track last user who changed status for auto-close
+	if err := h.logService.LogStatusChange(isOpen, user.GetDisplayName()); err != nil {
+		log.Printf("Error logging status change: %v", err)
+	}
+
 	h.schedulerService.UpdateLastUser(user.GetDisplayName())
 
 	statusText := h.t("status_changed_closed", user)
@@ -522,6 +536,10 @@ func (h *BotHandlers) handleTechStatusUpdate(data string, chatID int64, messageI
 	if err := h.statusService.UpdateTechnicalStatus(techStatus, user); err != nil {
 		h.editMessage(chatID, messageID, h.t("error_update_keys", user))
 		return
+	}
+
+	if err := h.logService.LogKeysChange(techStatus, user.GetDisplayName()); err != nil {
+		log.Printf("Error logging keys change: %v", err)
 	}
 
 	location := h.t("keys_location_lobby", user)
@@ -711,8 +729,6 @@ func (h *BotHandlers) answerCallback(callbackID, text string) {
 	h.bot.Request(callback)
 }
 
-// Auto-close handlers
-
 func (h *BotHandlers) handleAutoCloseSettings(chatID int64, messageID int, user *models.User) {
 	settings, err := h.schedulerService.GetSettings()
 	if err != nil {
@@ -771,7 +787,6 @@ func (h *BotHandlers) handleAutoCloseToggle(chatID int64, messageID int, user *m
 		return
 	}
 
-	// Show updated settings
 	h.handleAutoCloseSettings(chatID, messageID, user)
 }
 
@@ -821,7 +836,6 @@ func (h *BotHandlers) handleAutoCloseKeysUpdate(data string, chatID int64, messa
 }
 
 func (h *BotHandlers) handleAutoCloseTimeUpdate(chatID int64, user *models.User, timeStr string) {
-	// Validate time format HH:MM
 	if !h.isValidTimeFormat(timeStr) {
 		h.sendMessage(chatID, h.t("auto_close_time_invalid", user))
 		return
@@ -859,4 +873,137 @@ func (h *BotHandlers) isValidTimeFormat(timeStr string) bool {
 	}
 
 	return true
+}
+
+func (h *BotHandlers) handleStatusLogsMenu(chatID int64, messageID int, user *models.User) {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(h.t("btn_view_logs", user), "view_logs"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(h.t("btn_download_logs", user), "download_logs"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(h.t("btn_back", user), "back_to_menu"),
+		),
+	)
+
+	h.editMessageWithKeyboard(chatID, messageID, h.t("logs_menu_header", user), keyboard)
+}
+
+func (h *BotHandlers) handleViewLogs(chatID int64, messageID int, user *models.User, page int) {
+	now := time.Now()
+	month := int(now.Month())
+	year := now.Year()
+
+	entries, totalPages, err := h.logService.GetLogEntries(month, year, page)
+	if err != nil {
+		h.editMessage(chatID, messageID, h.t("error_generic", user))
+		return
+	}
+
+	if len(entries) == 0 {
+		keyboard := tgbotapi.NewInlineKeyboardMarkup(
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(h.t("btn_back", user), "status_logs"),
+			),
+		)
+		h.editMessageWithKeyboard(chatID, messageID, h.t("logs_empty", user), keyboard)
+		return
+	}
+
+	text := h.tParams("logs_header", user, map[string]string{
+		"month":       fmt.Sprintf("%02d", month),
+		"year":        strconv.Itoa(year),
+		"page":        strconv.Itoa(page),
+		"total_pages": strconv.Itoa(totalPages),
+	})
+
+	for _, entry := range entries {
+		var actionText string
+		if entry.Action == "keys" {
+			if entry.ActionData == "admin" {
+				actionText = h.t("log_keys_admin", user)
+			} else {
+				actionText = h.t("log_keys_lobby", user)
+			}
+		} else {
+			if entry.ActionData == "open" {
+				actionText = h.t("log_status_open", user)
+			} else {
+				actionText = h.t("log_status_closed", user)
+			}
+		}
+
+		text += h.tParams("logs_entry", user, map[string]string{
+			"date":   entry.Timestamp.Format("02.01.2006"),
+			"time":   entry.Timestamp.Format("15:04:05"),
+			"status": actionText,
+			"user":   entry.ChangedBy,
+		})
+	}
+
+	keyboard := h.generateLogsKeyboard(page, totalPages, user)
+	h.editMessageWithKeyboard(chatID, messageID, text, keyboard)
+}
+
+func (h *BotHandlers) generateLogsKeyboard(currentPage, totalPages int, user *models.User) tgbotapi.InlineKeyboardMarkup {
+	var rows [][]tgbotapi.InlineKeyboardButton
+
+	var navRow []tgbotapi.InlineKeyboardButton
+	if currentPage > 1 {
+		navRow = append(navRow, tgbotapi.NewInlineKeyboardButtonData("⬅️", fmt.Sprintf("logs_page_%d", currentPage-1)))
+	}
+	if currentPage < totalPages {
+		navRow = append(navRow, tgbotapi.NewInlineKeyboardButtonData("➡️", fmt.Sprintf("logs_page_%d", currentPage+1)))
+	}
+	if len(navRow) > 0 {
+		rows = append(rows, navRow)
+	}
+
+	rows = append(rows, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(h.t("btn_back", user), "status_logs"),
+	))
+
+	return tgbotapi.NewInlineKeyboardMarkup(rows...)
+}
+
+func (h *BotHandlers) handleLogsPageNavigation(data string, chatID int64, messageID int, user *models.User) {
+	pageStr := strings.TrimPrefix(data, "logs_page_")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	h.handleViewLogs(chatID, messageID, user, page)
+}
+
+func (h *BotHandlers) handleDownloadLogs(chatID int64, messageID int, user *models.User) {
+	now := time.Now()
+	month := int(now.Month())
+	year := now.Year()
+
+	if !h.logService.LogFileExists(month, year) {
+		h.editMessage(chatID, messageID, h.t("logs_file_not_found", user))
+		go func() {
+			time.Sleep(2 * time.Second)
+			h.handleStatusLogsMenu(chatID, messageID, user)
+		}()
+		return
+	}
+
+	logPath := h.logService.GetLogFilePath(month, year)
+
+	doc := tgbotapi.NewDocument(chatID, tgbotapi.FilePath(logPath))
+	doc.Caption = h.tParams("logs_file_caption", user, map[string]string{
+		"month": fmt.Sprintf("%02d", month),
+		"year":  strconv.Itoa(year),
+	})
+
+	if _, err := h.bot.Send(doc); err != nil {
+		log.Printf("Error sending log file: %v", err)
+		h.editMessage(chatID, messageID, h.t("error_generic", user))
+		return
+	}
+
+	h.handleStatusLogsMenu(chatID, messageID, user)
 }

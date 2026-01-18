@@ -179,3 +179,24 @@ auto_close_time_updated: "✅ Auto-close time changed to {time}"
 auto_close_time_invalid: "❌ Invalid time format. Use HH:MM"
 auto_close_keys_select: "🗝️ Where should keys go after auto-close?"
 auto_close_keys_updated: "✅ Keys will be {location}"
+
+# Status Logs
+btn_status_logs: "📋 Status Logs"
+logs_menu_header: "📋 Status Logs Menu"
+btn_view_logs: "👁️ View Logs"
+btn_download_logs: "📥 Download Log"
+logs_empty: "📭 No log entries for this month"
+logs_header: |
+  📋 Status logs for {month}.{year}
+
+  Page {page} of {total_pages}
+
+logs_entry: "📅 {date} {time}\n   Status: {status} | By: {user}\n"
+log_status_open: "Open ✅"
+log_status_closed: "Closed ❌"
+log_keys_admin: "Keys → Admin 👤"
+log_keys_lobby: "Keys → Lobby 🏢"
+logs_file_caption: "📋 Status log for {month}.{year}"
+logs_file_not_found: "❌ Log file for this month not found"
+
+

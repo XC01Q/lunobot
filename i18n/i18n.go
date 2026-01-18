@@ -80,7 +80,6 @@ func (t *Translator) Get(key string, lang Language) string {
 		}
 	}
 
-	// Fallback to Ukrainian
 	if translations, ok := t.translations[LangUA]; ok {
 		if text, ok := translations[key]; ok {
 			return text
