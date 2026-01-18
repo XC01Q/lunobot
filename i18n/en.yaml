@@ -1,0 +1,181 @@
+# English translations
+language_name: "English"
+language_code: "en"
+
+# Language selection
+select_language: "🌍 Оберіть мову / Select language:"
+language_selected: "✅ Language changed to English"
+
+# Welcome & Help
+welcome: |
+  👋 Welcome, {display_name}!
+
+  🏢 This is the Lunoteka information bot
+  👤 Your access level: {rights}
+
+  Use /help to get help
+
+help_header: "📖 Bot Help:\n\n"
+help_commands: |
+  🔹 /start - main menu
+  🔹 /help - this help
+  🔹 /cancel - cancel current action
+
+help_user_features: |
+  👤 Available features:
+  • Check Lunoteka status
+  • Send ideas
+  • Manage opening notifications
+
+help_manager_features: |
+  👔 Manager features:
+  • Change Lunoteka status
+  • Key management
+
+help_admin_features: |
+  👑 Admin features:
+  • View and delete ideas
+  • Manage user rights
+  • Broadcast messages
+
+# Main menu
+main_menu: "🏠 Main menu:"
+
+# Menu buttons
+btn_check_status: "📊 Check status"
+btn_send_idea: "💡 Send idea"
+btn_notifications: "🔔 Notifications"
+btn_set_open_status: "🔓 Change status"
+btn_set_tech_status: "🗝️ Key management"
+btn_read_ideas: "📚 View ideas"
+btn_set_rights: "⚡ Manage rights"
+btn_create_broadcast: "📢 Broadcast"
+btn_back: "🔙 Back"
+btn_refresh: "🔄 Refresh"
+btn_language: "🌍 Language"
+
+# Status
+status_header: "📊 Lunoteka status:\n\n"
+status_open: "Open ✅"
+status_closed: "Closed ❌"
+status_keys_lobby: "At reception 🏢"
+status_keys_admin: "With admin 👤"
+status_state: "🔓 State: {status}"
+status_keys: "🗝️ Keys: {location}"
+status_updated: "🕐 Updated: {time}"
+status_updated_by: "👤 Changed by: {user}"
+status_select_open: "🔓 Select Lunoteka status:"
+status_select_keys: "🗝️ Select key location:"
+status_btn_open: "✅ Open"
+status_btn_close: "❌ Close"
+status_btn_keys_admin: "👤 With admin"
+status_btn_keys_lobby: "🏢 At reception"
+status_changed_open: "✅ Lunoteka is now open"
+status_changed_closed: "✅ Lunoteka is now closed"
+status_keys_changed: "✅ Keys are now {location}"
+keys_location_lobby: "at reception"
+keys_location_admin: "with admin"
+
+# Notifications
+notifications_enabled: "🔔 Notifications enabled\n\nYou will receive messages when Lunoteka opens."
+notifications_disabled: "🔕 Notifications disabled\n\nYou will not receive messages about Lunoteka opening."
+btn_notifications_enable: "🔔 Enable notifications"
+btn_notifications_disable: "🔕 Disable notifications"
+notification_open: "🎉 Lunoteka is now open!"
+
+# Ideas
+idea_prompt: |
+  💡 Send your idea or suggestion:
+
+  📝 Maximum 4000 characters
+  ❌ Use /cancel to cancel
+idea_saved: "✅ Idea sent successfully!"
+idea_too_long: "❌ Message is too long (maximum 4000 characters)"
+ideas_empty: "📭 No ideas yet"
+idea_header: "📚 Idea {current} of {total}\n\n🆔 #{id}\n👤 {username}\n📅 {date}\n\n💭 {content}"
+idea_anonymous: "Anonymous"
+idea_deleted: "✅ Idea deleted!"
+idea_not_found: "❌ Idea not found"
+btn_delete_idea: "🗑️ Delete"
+
+# Rights
+rights_select: "⚡ Select rights level:"
+rights_user: "User"
+rights_manager: "Manager"
+rights_admin: "Admin"
+rights_unknown: "Unknown"
+btn_rights_user: "👤 User"
+btn_rights_manager: "👔 Manager"
+btn_rights_admin: "👑 Admin"
+rights_username_prompt: |
+  👤 Send the user's username (with or without @):
+
+  📝 For example: @username or username
+  ⚠️ User must first message the bot (/start)
+  ❌ Use /cancel to cancel
+rights_updated: "✅ User {user} rights changed to {rights}"
+user_not_found: "❌ User with this username not found\nUser must first message the bot (/start)"
+
+# Broadcast
+broadcast_prompt: |
+  📢 Send a message for broadcast:
+
+  📝 Maximum 4000 characters
+  👥 Will be sent to all managers and admins
+  ❌ Use /cancel to cancel
+broadcast_sent: "✅ Broadcast sent to {count} users"
+
+# Errors
+error_generic: "❌ An error occurred. Please try again later."
+error_unknown_command: "❌ Unknown command or insufficient permissions"
+error_get_status: "❌ Error getting status"
+error_update_status: "❌ Error updating status"
+error_update_keys: "❌ Error updating key status"
+error_get_ideas: "❌ Error getting ideas"
+error_save_idea: "❌ Error saving idea: {error}"
+error_delete_idea: "❌ Error deleting idea"
+error_idea_id: "❌ Error processing idea ID"
+error_get_user: "❌ Error getting/creating user"
+error_find_user: "❌ Error searching for user: {error}"
+error_update_rights: "❌ Error updating rights: {error}"
+error_invalid_rights: "❌ Invalid rights level"
+error_empty_username: "❌ Username cannot be empty"
+error_data_processing: "❌ Error processing data"
+error_notifications: "❌ Error updating notification settings"
+error_broadcast: "❌ Error sending broadcast: {error}"
+
+# System messages
+bot_stopped: "Bot stopped"
+panic_handler: "Panic in HandleUpdate: {error}"
+
+# Auto-close
+btn_auto_close: "⏰ Auto-close"
+auto_close_header: "⏰ Auto-close settings"
+auto_close_status_enabled: "✅ Enabled"
+auto_close_status_disabled: "❌ Disabled"
+auto_close_time: "🕐 Time: {time}"
+auto_close_keys: "🗝️ Keys: {location}"
+auto_close_info: |
+  ⏰ Auto-close
+
+  Status: {status}
+  Close time: {time}
+  Keys after closing: {keys}
+
+  Last status change by: {last_user}
+btn_auto_close_toggle: "🔄 {action}"
+btn_auto_close_time: "🕐 Change time"
+btn_auto_close_keys: "🗝️ Change keys"
+auto_close_toggle_enable: "Enable"
+auto_close_toggle_disable: "Disable"
+auto_close_enabled: "✅ Auto-close enabled"
+auto_close_disabled: "❌ Auto-close disabled"
+auto_close_time_prompt: |
+  🕐 Enter auto-close time in HH:MM format
+
+  For example: 22:00 or 21:30
+  ❌ Use /cancel to cancel
+auto_close_time_updated: "✅ Auto-close time changed to {time}"
+auto_close_time_invalid: "❌ Invalid time format. Use HH:MM"
+auto_close_keys_select: "🗝️ Where should keys go after auto-close?"
+auto_close_keys_updated: "✅ Keys will be {location}"
